@@ -19,7 +19,9 @@ app.use(
       "http://localhost:5174",
       "http://localhost:5175",
       "https://dictionary-backend-7m19.onrender.com",
+      "https://dictionary-frontend-flax.vercel.app",
     ],
+    credentials: true,
   })
 );
 
