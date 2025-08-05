@@ -1,14 +1,12 @@
 const { WordModel } = require("../../models/word/word.model.js");
 const { StatusCodes } = require("http-status-codes");
 const { HttpException } = require("../../utils/http-exception.js");
-// const { SaveFileModel } = require("../../models/save-file/save-file.model.js"); // image ga oid bo'lgani uchun vaqtinchalik o'chirildi
+
 
 class WordController {
   static getAll = async (req, res) => {
     const { search, page, limit, dictionary, department, category } = req.query;
 
-    const parsedPage = Number(page) || 1;
-    const parsedLimit = Number(limit) || 10;
 
     let searchQuery = {};
     if (search && search.length > 0) {
@@ -20,7 +18,6 @@ class WordController {
       };
     }
 
-    // Filtirlash (filter) qo'shimcha logic
     if (dictionary) {
       searchQuery.dictionary = dictionary;
     }
@@ -32,28 +29,12 @@ class WordController {
     }
 
     const words = await WordModel.find(searchQuery)
-      .skip((parsedPage - 1) * parsedLimit)
-      .limit(parsedLimit)
       .populate("dictionary")
       .populate("department")
       .populate("category")
       .lean();
 
-    const total = await WordModel.countDocuments(searchQuery);
-
-    res.status(200).json({
-      success: true,
-      data: words,
-      pagination: {
-        currentPage: parsedPage,
-        totalItems: total,
-        page: parsedPage,
-        limit: parsedLimit,
-        totalPages: Math.ceil(total / parsedLimit),
-        hasNextPage: (parsedPage - 1) * parsedLimit + words.length < total,
-        hasPrevPage: parsedPage > 1,
-      },
-    });
+    res.status(200).json(words);
   };
 
   static getById = async (req, res) => {
@@ -66,7 +47,7 @@ class WordController {
     if (!word) {
       throw new HttpException(StatusCodes.NOT_FOUND, "Word not found!");
     }
-    res.status(200).json({ success: true, data: word });
+    res.status(200).json(word);
   };
 
   static add = async (req, res) => {

@@ -10,18 +10,25 @@ require("./utils/cron-job.js");
 void ConnectDB();
 
 app.use(express.json());
-app.use(cors({ origin: ["http://localhost:3000", "http://localhost:3001"] }));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://localhost:5175",
+    ],
+  })
+);
 
 app.get("/", (req, res) => {
   res.status(200).json({ success: true, msg: "OK" });
 });
-
 main_router.forEach((value) => {
   app.use(value.path, value.router);
 });
-
 app.use(errorMiddleware);
-
 app.listen(PORT, () => {
   console.log(`Example app listening on port http://localhost:${PORT}`);
 });

@@ -3,11 +3,12 @@ const {
 } = require("../../models/dictionary/dictionary.model.js");
 const { StatusCodes } = require("http-status-codes");
 const { HttpException } = require("../../utils/http-exception.js");
-// const { SaveFileModel } = require("../../models/save-file/save-file.model.js"); // image ga oid bo'lgani uchun vaqtinchalik o'chirildi
+
 
 class DictionaryController {
   static getAll = async (req, res) => {
     const { search, page, limit } = req.query;
+    console.log(search, "search");
 
     const parsedPage = Number(page) || 1;
     const parsedLimit = Number(limit) || 10;
@@ -25,24 +26,10 @@ class DictionaryController {
     const dictionaries = await DictionaryModel.find(searchQuery)
       .skip((parsedPage - 1) * parsedLimit)
       .limit(parsedLimit)
-      .lean(); // Ma'lumotlarni tezroq olish uchun .lean() dan foydalanish
+      .lean();  
 
-    const total = await DictionaryModel.countDocuments(searchQuery);
 
-    res.status(200).json({
-      success: true,
-      data: dictionaries,
-      pagination: {
-        currentPage: parsedPage,
-        totalItems: total,
-        page: parsedPage,
-        limit: parsedLimit,
-        totalPages: Math.ceil(total / parsedLimit),
-        hasNextPage:
-          (parsedPage - 1) * parsedLimit + dictionaries.length < total,
-        hasPrevPage: parsedPage > 1,
-      },
-    });
+    res.status(200).json(dictionaries);
   };
 
   static getById = async (req, res) => {
@@ -51,7 +38,7 @@ class DictionaryController {
     if (!dictionary) {
       throw new HttpException(StatusCodes.NOT_FOUND, "Dictionary not found!");
     }
-    res.status(200).json({ success: true, data: dictionary });
+    res.status(200).json(dictionary);
   };
 
   static add = async (req, res) => {
@@ -106,7 +93,6 @@ class DictionaryController {
       updatedDictionary.description = description;
     }
 
-    // Agar hech qanday o'zgarish bo'lmasa, xato qaytarish
     if (Object.keys(updatedDictionary).length === 0) {
       throw new HttpException(
         StatusCodes.BAD_REQUEST,

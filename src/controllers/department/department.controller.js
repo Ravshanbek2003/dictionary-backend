@@ -3,14 +3,11 @@ const {
 } = require("../../models/department/department.model.js");
 const { StatusCodes } = require("http-status-codes");
 const { HttpException } = require("../../utils/http-exception.js");
-// const { SaveFileModel } = require("../../models/save-file/save-file.model.js"); // image ga oid bo'lgani uchun vaqtinchalik o'chirildi
+
 
 class DepartmentController {
   static getAll = async (req, res) => {
-    const { search, page, limit } = req.query;
-
-    const parsedPage = Number(page) || 1;
-    const parsedLimit = Number(limit) || 10;
+    const { search, dictype } = req.query;
 
     let searchQuery = {};
     if (search && search.length > 0) {
@@ -21,29 +18,15 @@ class DepartmentController {
         ],
       };
     }
+    if (dictype) {
+      searchQuery.dictionary = dictype;
+    }
 
     const departments = await DepartmentModel.find(searchQuery)
-      .skip((parsedPage - 1) * parsedLimit)
-      .limit(parsedLimit)
-      .populate("dictionary") // dictionary modelini ma'lumotlarini qo'shish
+      .populate("dictionary")  
       .lean();
 
-    const total = await DepartmentModel.countDocuments(searchQuery);
-
-    res.status(200).json({
-      success: true,
-      data: departments,
-      pagination: {
-        currentPage: parsedPage,
-        totalItems: total,
-        page: parsedPage,
-        limit: parsedLimit,
-        totalPages: Math.ceil(total / parsedLimit),
-        hasNextPage:
-          (parsedPage - 1) * parsedLimit + departments.length < total,
-        hasPrevPage: parsedPage > 1,
-      },
-    });
+    res.status(200).json(departments);
   };
 
   static getById = async (req, res) => {
@@ -54,13 +37,16 @@ class DepartmentController {
     if (!department) {
       throw new HttpException(StatusCodes.NOT_FOUND, "Department not found!");
     }
-    res.status(200).json({ success: true, data: department });
+    res.status(200).json(department);
   };
 
   static add = async (req, res) => {
-    const { title, description, dictionary } = req.body;
+    const { title, dictionary } = req.body;
 
-    const existingDepartment = await DepartmentModel.findOne({ title });
+    const existingDepartment = await DepartmentModel.findOne({
+      title,
+      dictionary,
+    });
     if (existingDepartment) {
       throw new HttpException(
         StatusCodes.CONFLICT,
@@ -70,7 +56,6 @@ class DepartmentController {
 
     await DepartmentModel.create({
       title,
-      description,
       dictionary,
     });
 
@@ -81,7 +66,7 @@ class DepartmentController {
 
   static update = async (req, res) => {
     const { id } = req.params;
-    const { title, description, dictionary } = req.body;
+    const { title,  dictionary } = req.body;
 
     const department = await DepartmentModel.findById(id);
     if (!department) {
@@ -101,15 +86,10 @@ class DepartmentController {
       updatedDepartment.title = title;
     }
 
-    if (description && description !== department.description) {
-      updatedDepartment.description = description;
-    }
-
     if (dictionary && dictionary !== department.dictionary.toString()) {
       updatedDepartment.dictionary = dictionary;
     }
 
-    // Agar hech qanday o'zgarish bo'lmasa, xato qaytarish
     if (Object.keys(updatedDepartment).length === 0) {
       throw new HttpException(
         StatusCodes.BAD_REQUEST,

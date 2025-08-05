@@ -8,6 +8,8 @@ const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
 const AWS_URL = process.env.AWS_URL;
 const AWS_REGION = process.env.AWS_REGION;
 const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
+const REG_KEY = process.env.REG_KEY;
+const JWT_SECRET = process.env.JWT_SECRET;
 
 module.exports = {
   PORT,
@@ -17,4 +19,6 @@ module.exports = {
   AWS_URL,
   AWS_REGION,
   AWS_BUCKET_NAME,
+  REG_KEY,
+  JWT_SECRET,
 };

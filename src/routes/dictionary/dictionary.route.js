@@ -9,11 +9,13 @@ const { expressValidate } = require("../../validators/index.js");
 const {
   DictionaryValidator,
 } = require("../../validators/dictionary/dictionary.validator.js");
+const { authMiddleware } = require("../../middlewares/auth.middleware.js");
 
 dictionaryRouter.get("/get-all", DictionaryController.getAll);
 
 dictionaryRouter.get(
   "/get/:id",
+  authMiddleware,
   DictionaryValidator.getById(),
   expressValidate,
   DictionaryController.getById
@@ -21,6 +23,7 @@ dictionaryRouter.get(
 
 dictionaryRouter.post(
   "/add",
+  authMiddleware,
   DictionaryValidator.add(),
   expressValidate,
   DictionaryController.add
@@ -28,6 +31,7 @@ dictionaryRouter.post(
 
 dictionaryRouter.put(
   "/update/:id",
+  authMiddleware,
   DictionaryValidator.update(),
   expressValidate,
   DictionaryController.update
@@ -35,6 +39,7 @@ dictionaryRouter.put(
 
 dictionaryRouter.delete(
   "/delete/:id",
+  authMiddleware,
   DictionaryValidator.getById(),
   expressValidate,
   DictionaryController.delete
